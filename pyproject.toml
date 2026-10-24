@@ -4,7 +4,7 @@ version = "0.3.0"
 description = "MCP server that measures and fixes .docx layout with Word (macOS, Windows) or LibreOffice (Linux)"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "GPL-2.0-only" }
+license = { text = "MIT" }
 dependencies = ["fastmcp>=2.0"]
 
 [project.optional-dependencies]
@@ -12,7 +12,7 @@ windows = ["pywin32>=306"]
 dev = ["pytest>=8.0", "ruff>=0.6"]
 
 [project.scripts]
-word-mcp = "wordmcp.server:main"
+word-mcp = "wordmcp.__main__:main"
 
 [build-system]
 requires = ["hatchling"]

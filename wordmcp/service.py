@@ -95,8 +95,9 @@ class DocumentService:
         self._use(path)
         return PageText(page, self._engine.page_text(page))
 
-    def update_fields(self, toc: bool = True) -> UpdateResult:
+    def update_fields(self, toc: bool = True, path: str | None = None) -> UpdateResult:
         """Refresh fields and tables of contents."""
+        self._use(path)
         return UpdateResult(self._engine.update_fields(toc))
 
     def format_paragraphs(

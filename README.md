@@ -73,8 +73,18 @@ wordmcp/
 │   ├── com.py         Word on Windows
 │   └── uno.py         LibreOffice
 ├── service.py         document operations, expressed once
-└── server.py          MCP tools: validate, delegate, return a model
+├── tools/
+│   ├── session.py     open, close, save, status
+│   ├── measure.py     page count, search, headings, outline, page text, self-test
+│   ├── modify.py      formatting, field updates, PDF export
+│   └── escape.py      engine-native code, registered only when allowed
+├── server.py          assembles a server from the tool groups
+└── __main__.py        composition root: pick an engine, serve over stdio
 ```
+
+Each tool module exposes `register(mcp, service)` and keeps nothing at module scope, so the
+groups stay independent and no global server instance is needed. Tool bodies are one line:
+they delegate to the service, which holds the logic and is what the tests exercise.
 
 Dependencies are injected through constructors: an engine goes into `DocumentService`, the
 service goes into `create_server`. There is no global state, so the logic runs against a stub:
@@ -103,7 +113,7 @@ server = create_server(DocumentService(StubEngine()), allow_raw=False)
 ## Installing
 
 ```bash
-git clone https://github.com/Cheppy/word-mcp.git
+git clone https://github.com/<user>/word-mcp.git
 cd word-mcp
 uv sync
 ```
@@ -140,7 +150,7 @@ On Linux the system interpreter is usually required:
   "mcpServers": {
     "word": {
       "command": "python3",
-      "args": ["-m", "wordmcp.server"],
+      "args": ["-m", "wordmcp"],
       "env": { "PYTHONPATH": "/path/to/word-mcp" }
     }
   }
@@ -174,4 +184,4 @@ COM calls on Windows are more stable.
 
 ## Licence
 
-GNU General Public License v2.0; see `LICENSE`.
+MIT

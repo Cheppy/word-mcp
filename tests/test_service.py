@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
 from wordmcp.engine import DocumentEngine
 from wordmcp.engines import resolve_name
 from wordmcp.models import EngineStatus, Heading, ParagraphFormat
+from wordmcp.server import create_server
 from wordmcp.service import DocumentService
 
 
@@ -116,3 +119,26 @@ def test_environment_overrides_the_platform() -> None:
 def test_unknown_engine_is_rejected() -> None:
     with pytest.raises(ValueError):
         resolve_name("nope", env={})
+
+
+def test_update_fields_opens_the_document_when_a_path_is_given() -> None:
+    engine = StubEngine()
+    DocumentService(engine).update_fields(toc=True, path="/tmp/a.docx")
+    assert engine.opened == ["/tmp/a.docx"]
+
+
+def tool_names(allow_raw: bool = False) -> set[str]:
+    server = create_server(DocumentService(StubEngine()), allow_raw=allow_raw)
+    return {tool.name for tool in asyncio.run(server.list_tools())}
+
+
+def test_server_registers_every_tool_group() -> None:
+    names = tool_names()
+    assert {"word_status", "word_open"} <= names
+    assert {"word_page_count", "word_outline", "word_selftest"} <= names
+    assert {"word_format_paragraphs", "word_update_fields", "word_export_pdf"} <= names
+
+
+def test_escape_hatch_appears_only_when_allowed() -> None:
+    assert "word_run_raw" not in tool_names()
+    assert "word_run_raw" in tool_names(allow_raw=True)
